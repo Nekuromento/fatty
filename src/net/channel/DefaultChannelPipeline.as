@@ -306,8 +306,7 @@ package net.channel {
                 DefaultChannelHandlerContext(getContext(handler));
             if (ctx == null)
                 throw new ArgumentError("no such element");
-            else
-                return ctx;
+            return ctx;
         }
 
         public function removeByName(name : String) : IChannelHandler {
