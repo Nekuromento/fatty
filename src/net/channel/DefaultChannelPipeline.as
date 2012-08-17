@@ -1,8 +1,12 @@
 package net.channel {
-    import com.adobe.utils.DictionaryUtil;
-
-    import flash.errors.IllegalOperationError;
-    import flash.utils.Dictionary;
+	import net.channel.errors.ChannelHandlerLifeCycleException;
+	import net.channel.errors.ChannelPipelineException;
+	import net.channel.events.IChannelEvent;
+	import net.channel.events.IExceptionEvent;
+	import net.channel.events.UpstreamMessageEvent;
+	import com.adobe.utils.DictionaryUtil;
+	import flash.errors.IllegalOperationError;
+	import flash.utils.Dictionary;
 
     public class DefaultChannelPipeline implements IChannelPipeline {
         private static const _discardingSink : IChannelSink = new DiscardingChannelSink();
@@ -32,31 +36,51 @@ package net.channel {
         }
 
         public function sendDownstream(event : IChannelEvent) : void {
-            //TODO: implement
+            const tail : DefaultChannelHandlerContext =
+                getActualDownstreamContext(_tail);
+            if (tail == null) {
+                try {
+                    sink.eventSunk(this, event);
+                    return;
+                } catch (t : Error) {
+                    notifyHandlerException(event, t);
+                    return;
+                }
+            }
+    
+            sendDownstreamForContext(tail, event);
         }
 
         public function sendUpstream(event : IChannelEvent) : void {
-            //TODO: implement
+            const head : DefaultChannelHandlerContext =
+                getActualUpstreamContext(_head);
+            if (head == null) {
+//                if (logger.isWarnEnabled()) {
+//                    logger.warn(
+//                            "The pipeline contains no upstream handlers; discarding: " + e);
+//                }
+                return;
+            }
+    
+            sendUpstreamForContext(head, event);
         }
 
         public function getByName(name : String) : IChannelHandler {
-            //TODO: implement
-            return null;
+            const ctx : DefaultChannelHandlerContext = _contextRegistry[name];
+            return ctx != null ? ctx.handler : null;
         }
 
         public function getByType(type : Class) : IChannelHandler {
-            //TODO: implement
-            return null;
+            const ctx : IChannelHandlerContext = getContextByType(type);
+            return ctx != null ? ctx.handler : null;
         }
 
         public function getFirst() : IChannelHandler {
-            //TODO: implement
-            return null;
+            return _head != null ? _head.handler : null;
         }
 
         public function getLast() : IChannelHandler {
-            //TODO: implement
-            return null;
+            return _tail != null ? _tail.handler : null;
         }
 
         public function addFirst(name : String, handler : IChannelHandler) : void {
@@ -99,30 +123,123 @@ package net.channel {
             }
         }
 
-        private function callAfterAdd(context : DefaultChannelHandlerContext) : void {
-            //TODO: implement
+        private function callAfterAdd(ctx : IChannelHandlerContext) : void {
+            if (!(ctx.handler is ILifeCycleAwareChannelHandler))
+                return;
+    
+            const h : ILifeCycleAwareChannelHandler =
+                ILifeCycleAwareChannelHandler(ctx.handler);
+    
+            try {
+                h.afterAdd(ctx);
+            } catch (t : Error) {
+                var removed : Boolean = false;
+                try {
+                    removeContext(DefaultChannelHandlerContext(ctx));
+                    removed = true;
+                } catch (t2 : Error) {
+//                    if (logger.isWarnEnabled()) {
+//                        logger.warn("Failed to remove a handler: " + ctx.name, t2);
+//                    }
+                }
+    
+                if (removed) {
+                    throw new ChannelHandlerLifeCycleException(String(h) +
+                                                               ".afterAdd() has thrown an exception; removed.", t);
+                } else {
+                    throw new ChannelHandlerLifeCycleException(String(h) +
+                                                               ".afterAdd() has thrown an exception; also failed to remove.", t);
+                }
+            }
         }
 
-        private function callBeforeAdd(context : DefaultChannelHandlerContext) : void {
-            //TODO: implement
+        private function callBeforeAdd(ctx : DefaultChannelHandlerContext) : void {
+            if (!(ctx.handler is ILifeCycleAwareChannelHandler))
+                return;
+    
+            const h : ILifeCycleAwareChannelHandler =
+                ILifeCycleAwareChannelHandler(ctx.handler);
+    
+            try {
+                h.beforeAdd(ctx);
+            } catch (t : Error) {
+                throw new ChannelHandlerLifeCycleException(String(h) +
+                                                           ".beforeAdd() has thrown an exception; not adding.", t);
+            }
         }
 
         private function checkDuplicateName(name : String) : void {
-            //TODO: implement
+            if (_contextRegistry[name] != null)
+                throw new ArgumentError("Duplicate handler name: " + name);
         }
 
         private function init(name : String, handler : IChannelHandler) : void {
-            //TODO: implement
+            const ctx : DefaultChannelHandlerContext =
+                new DefaultChannelHandlerContext(this, null, null, name, handler);
+            callBeforeAdd(ctx);
+            _head = ctx;
+            _tail = ctx;
+            for each (var key : * in DictionaryUtil.getKeys(_contextRegistry))
+                delete _contextRegistry[key];
+            _contextRegistry[name] = ctx;
+            _contextCount = 1;
+            callAfterAdd(ctx);
         }
 
         public function removeFirst() : IChannelHandler {
-            // TODO: Auto-generated method stub
-            return null;
+            if (registryEmpty)
+                throw new IllegalOperationError("nothing to remove");
+    
+            const oldHead : DefaultChannelHandlerContext = _head;
+            if (oldHead == null)
+                throw new IllegalOperationError("nothing to remove");
+    
+            callBeforeRemove(oldHead);
+    
+            if (oldHead.next == null) {
+                _head = null;
+                _tail = null;
+                for each (var key : * in DictionaryUtil.getKeys(_contextRegistry))
+                    delete _contextRegistry[key];
+                _contextCount = 0;
+            } else {
+                oldHead.next.previous = null;
+                _head = oldHead.next;
+                delete _contextRegistry[oldHead.name];
+                --_contextCount;
+            }
+    
+            callAfterRemove(oldHead);
+    
+            return oldHead.handler;
         }
 
         public function removeLast() : IChannelHandler {
-            // TODO: Auto-generated method stub
-            return null;
+            if (registryEmpty)
+                throw new IllegalOperationError("nothing to remove");
+    
+            const oldTail : DefaultChannelHandlerContext = _tail;
+            if (oldTail == null)
+                throw new IllegalOperationError("nothing to remove");
+    
+            callBeforeRemove(oldTail);
+    
+            if (oldTail.previous == null) {
+                _head = null;
+                _tail = null;
+                for each (var key : * in DictionaryUtil.getKeys(_contextRegistry))
+                    delete _contextRegistry[key];
+                _contextCount = 0;
+            } else {
+                oldTail.previous.next = null;
+                _tail = oldTail.previous;
+                delete _contextRegistry[oldTail.name];
+                --_contextCount;
+            }
+    
+            callBeforeRemove(oldTail);
+    
+            return oldTail.handler;
         }
 
         public function remove(handler : IChannelHandler) : void {
@@ -155,11 +272,33 @@ package net.channel {
         }
 
         private function callAfterRemove(ctx : DefaultChannelHandlerContext) : void {
-            //TODO: implement
+            if (!(ctx.handler is ILifeCycleAwareChannelHandler))
+                return;
+    
+            const h : ILifeCycleAwareChannelHandler =
+                ILifeCycleAwareChannelHandler(ctx.handler);
+    
+            try {
+                h.afterRemove(ctx);
+            } catch (t : Error) {
+                throw new ChannelHandlerLifeCycleException(String(h) +
+                                                           ".afterRemove() has thrown an exception.", t);
+            }
         }
 
         private function callBeforeRemove(ctx : DefaultChannelHandlerContext) : void {
-            //TODO: implement
+            if (!(ctx.handler is ILifeCycleAwareChannelHandler))
+                return;
+    
+            const h : ILifeCycleAwareChannelHandler =
+                ILifeCycleAwareChannelHandler(ctx.handler);
+    
+            try {
+                h.beforeRemove(ctx);
+            } catch (t : Error) {
+                throw new ChannelHandlerLifeCycleException(String(h) +
+                                                           ".beforeRemove() has thrown an exception; not removing.", t);
+            }
         }
 
         private function getContextOrDie(handler : IChannelHandler) : DefaultChannelHandlerContext {
@@ -186,7 +325,71 @@ package net.channel {
         public function replace(oldHandler : IChannelHandler,
                                 newName : String,
                                 newHandler : IChannelHandler) : void {
-            //TODO: implement
+            replaceContext(getContextOrDie(oldHandler), newName, newHandler);
+        }
+
+        private function replaceContext(ctx : DefaultChannelHandlerContext,
+                                        newName : String,
+                                        newHandler : IChannelHandler) : void {
+            if (ctx == _head) {
+                removeFirst();
+                addFirst(newName, newHandler);
+            } else if (ctx == _tail) {
+                removeLast();
+                addLast(newName, newHandler);
+            } else {
+                const sameName : Boolean = ctx.name == newName;
+                if (!sameName)
+                    checkDuplicateName(newName);
+    
+                const previous : DefaultChannelHandlerContext = ctx.previous;
+                const next : DefaultChannelHandlerContext = ctx.next;
+                const newCtx : DefaultChannelHandlerContext =
+                    new DefaultChannelHandlerContext(this, previous, next, newName, newHandler);
+    
+                callBeforeRemove(ctx);
+                callBeforeAdd(newCtx);
+    
+                previous.next = newCtx;
+                next.previous = newCtx;
+    
+                if (!sameName) {
+                    delete _contextRegistry[ctx.name];
+                    --_contextCount;
+                }
+                _contextRegistry[newName] = newCtx;
+                ++_contextCount;
+    
+                var removeException : ChannelHandlerLifeCycleException = null;
+                var addException : ChannelHandlerLifeCycleException = null;
+                var removed : Boolean = false;
+                try {
+                    callAfterRemove(ctx);
+                    removed = true;
+                } catch (e : ChannelHandlerLifeCycleException) {
+                    removeException = e;
+                }
+    
+                var added : Boolean = false;
+                try {
+                    callAfterAdd(newCtx);
+                    added = true;
+                } catch (e : ChannelHandlerLifeCycleException) {
+                    addException = e;
+                }
+    
+                if (!removed && !added) {
+//                    logger.warn(removeException.getMessage(), removeException);
+//                    logger.warn(addException.getMessage(), addException);
+                    throw new ChannelHandlerLifeCycleException("Both " + String(ctx.handler) +
+                                                               ".afterRemove() and " + String(newCtx.handler) +
+                                                               ".afterAdd() failed; see logs.");
+                } else if (!removed) {
+                    throw removeException;
+                } else if (!added) {
+                    throw addException;
+                }
+            }
         }
 
         public function replaceByName(oldName : String,
@@ -286,7 +489,20 @@ package net.channel {
         }
 
         public function getContext(handler : IChannelHandler) : IChannelHandlerContext {
-            //TODO: implement
+            if (handler == null)
+                throw new ArgumentError("handler");
+            if (registryEmpty)
+                return null;
+
+            var ctx : DefaultChannelHandlerContext = _head;
+            for (;;) {
+                if (ctx.handler == handler)
+                    return ctx;
+    
+                ctx = ctx.next;
+                if (ctx == null)
+                    break;
+            }
             return null;
         }
 
@@ -295,32 +511,97 @@ package net.channel {
         }
 
         public function getContextByType(type : Class) : IChannelHandlerContext {
-            return getContext(getByType(type));
-        }
+            if (type == null)
+                throw new ArgumentError("handlerType");
+    
+            if (registryEmpty)
+                return null;
 
-        public function getActualUpstreamContext(next : DefaultChannelHandlerContext) : DefaultChannelHandlerContext {
-            //TODO: implement
+            var ctx : DefaultChannelHandlerContext = _head;
+            for (;;) {
+                if (ctx.handler is type)
+                    return ctx;
+    
+                ctx = ctx.next;
+                if (ctx == null)
+                    break;
+            }
             return null;
         }
 
-        public function getActualDownstreamContext(previous : DefaultChannelHandlerContext) : DefaultChannelHandlerContext {
-            //TODO: implement
-            return null;
+        public function getActualUpstreamContext(ctx : DefaultChannelHandlerContext) : DefaultChannelHandlerContext {
+            if (ctx == null)
+                return null;
+    
+            var realCtx : DefaultChannelHandlerContext = ctx;
+            while (!realCtx.canHandleUpstreamEvents) {
+                realCtx = realCtx.next;
+                if (realCtx == null)
+                    return null;
+            }
+    
+            return realCtx;
         }
 
-        public function sendUpstreamForContext(next : DefaultChannelHandlerContext,
+        public function getActualDownstreamContext(ctx : DefaultChannelHandlerContext) : DefaultChannelHandlerContext {
+            if (ctx == null)
+                return null;
+    
+            var realCtx : DefaultChannelHandlerContext = ctx;
+            while (!realCtx.canHandleDownstreamEvents) {
+                realCtx = realCtx.previous;
+                if (realCtx == null)
+                    return null;
+            }
+    
+            return realCtx;
+        }
+
+        public function sendUpstreamForContext(ctx : DefaultChannelHandlerContext,
                                                event : IChannelEvent) : void {
-            //TODO: implement
+            try {
+                IChannelUpstreamHandler(ctx.handler).handleUpstream(ctx, event);
+            } catch (t : Error) {
+                notifyHandlerException(event, t);
+            }
         }
 
-        public function sendDownstreamForContext(previous : DefaultChannelHandlerContext,
+        public function sendDownstreamForContext(ctx : DefaultChannelHandlerContext,
                                                  event : IChannelEvent) : void {
-            //TODO: implement
+            if (event is UpstreamMessageEvent)
+                throw new ArgumentError("cannot send an upstream event to downstream");
+
+            try {
+                IChannelDownstreamHandler(ctx.handler).handleDownstream(ctx, event);
+            } catch (t : Error) {
+                notifyHandlerException(event, t);
+            }
         }
 
         public function notifyHandlerException(event : IChannelEvent,
                                                e : Error) : void {
-            //TODO: implement
+            if (event is IExceptionEvent) {
+//                if (logger.isWarnEnabled()) {
+//                    logger.warn(
+//                            "An exception was thrown by a user handler " +
+//                            "while handling an exception event (" + event + ")", e);
+//                }
+    
+                return;
+            }
+    
+            const pe : ChannelPipelineException =
+                e is ChannelPipelineException
+                    ? e as ChannelPipelineException
+                    : new ChannelPipelineException("", e);
+    
+            try {
+                sink.exceptionCaught(this, event, pe);
+            } catch (error : Error) {
+//                if (logger.isWarnEnabled()) {
+//                    logger.warn("An exception was thrown by an exception handler.", error);
+//                }
+            }
         }
     }
 }

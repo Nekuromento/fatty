@@ -1,5 +1,6 @@
 package net.channel {
     import util.debug.warning;
+
     import org.osflash.signals.natives.base.SignalSocket;
 
     import flash.events.Event;

@@ -1,4 +1,6 @@
 package net.channel {
+    import net.channel.events.IChannelEvent;
+
     public interface IChannelPipeline {
         function get channel() : IChannel;
         function get sink() : IChannelSink;

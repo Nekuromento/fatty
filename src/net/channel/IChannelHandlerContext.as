@@ -1,4 +1,6 @@
 package net.channel {
+    import net.channel.events.IChannelEvent;
+
     public interface IChannelHandlerContext {
         function get channel() : IChannel;
         function get pipeline() : IChannelPipeline;

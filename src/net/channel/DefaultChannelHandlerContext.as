@@ -1,5 +1,7 @@
 package net.channel {
-    public class DefaultChannelHandlerContext implements IChannelEvent, IChannelHandlerContext {
+    import net.channel.events.IChannelEvent;
+ 
+    public class DefaultChannelHandlerContext implements IChannelHandlerContext {
         private var _pipeline : DefaultChannelPipeline;
         private var _next : DefaultChannelHandlerContext;
         private var _previous : DefaultChannelHandlerContext;
@@ -28,8 +30,8 @@ package net.channel {
 
             if (!_canHandleUpstream && !_canHandleDownstream) {
                 throw new ArgumentError("handler must be either " +
-                                        String(IChannelUpstreamHandler) + " or " +
-                                        String(IChannelDownstreamHandler) + '.');
+                                        "IChannelUpstreamHandler or " +
+                                        "IChannelDownstreamHandler.");
             }
 
             _pipeline = pipeline;
