@@ -1,12 +1,12 @@
 package net.channel {
-	import net.channel.errors.ChannelHandlerLifeCycleException;
-	import net.channel.errors.ChannelPipelineException;
-	import net.channel.events.IChannelEvent;
-	import net.channel.events.IExceptionEvent;
-	import net.channel.events.UpstreamMessageEvent;
-	import com.adobe.utils.DictionaryUtil;
-	import flash.errors.IllegalOperationError;
-	import flash.utils.Dictionary;
+    import net.channel.errors.ChannelHandlerLifeCycleException;
+    import net.channel.errors.ChannelPipelineException;
+    import net.channel.events.IChannelEvent;
+    import net.channel.events.IExceptionEvent;
+    import net.channel.events.UpstreamMessageEvent;
+    import com.adobe.utils.DictionaryUtil;
+    import flash.errors.IllegalOperationError;
+    import flash.utils.Dictionary;
 
     public class DefaultChannelPipeline implements IChannelPipeline {
         private static const _discardingSink : IChannelSink = new DiscardingChannelSink();
