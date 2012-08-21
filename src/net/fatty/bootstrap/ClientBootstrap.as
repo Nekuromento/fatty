@@ -16,7 +16,7 @@ package net.fatty.bootstrap {
     
             var pipeline : IChannelPipeline;
             try {
-                pipeline = pipelineFactory.pipeline;
+                pipeline = pipelineFactory.newPipeline;
             } catch (e : Error) {
                 throw new ChannelPipelineException("Failed to initialize a pipeline.", e);
             }

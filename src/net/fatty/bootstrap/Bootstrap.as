@@ -8,7 +8,7 @@ package net.fatty.bootstrap {
 
     public class Bootstrap {
         private var _channelFactory : IChannelFactory;
-        private var _pipeline : IChannelPipeline = Channels.pipeline();
+        private var _pipeline : IChannelPipeline = Channels.newPipeline();
         private var _pipelineFactory : IChannelPipelineFactory = Channels.pipelineFactory(_pipeline);
 
         public function Bootstrap(factory : IChannelFactory = null) {

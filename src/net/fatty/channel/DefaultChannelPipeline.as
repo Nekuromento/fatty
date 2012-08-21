@@ -496,13 +496,9 @@ package net.fatty.channel {
                 return null;
 
             var ctx : DefaultChannelHandlerContext = _head;
-            for (;;) {
+            for (; ctx != null; ctx = ctx.next) {
                 if (ctx.handler == handler)
                     return ctx;
-    
-                ctx = ctx.next;
-                if (ctx == null)
-                    break;
             }
             return null;
         }
@@ -519,13 +515,9 @@ package net.fatty.channel {
                 return null;
 
             var ctx : DefaultChannelHandlerContext = _head;
-            for (;;) {
+            for (; ctx != null; ctx = ctx.next) {
                 if (ctx.handler is type)
                     return ctx;
-    
-                ctx = ctx.next;
-                if (ctx == null)
-                    break;
             }
             return null;
         }
@@ -608,13 +600,9 @@ package net.fatty.channel {
         public function asArray() : Array {
             const array : Array = new Array();
             var ctx : DefaultChannelHandlerContext = _head;
-            for (;;) {
+            for (; ctx != null; ctx = ctx.next) {
                 array.push(ctx.name);
                 array.push(ctx.handler);
-
-                ctx = ctx.next;
-                if (ctx == null)
-                    break;
             }
             return array;
         }

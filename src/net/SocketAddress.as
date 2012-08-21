@@ -9,7 +9,7 @@ package net {
         }
 
         public function get host() : String {
-            return host;
+            return _host;
         }
 
         public function get port() : int {

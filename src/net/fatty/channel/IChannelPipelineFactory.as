@@ -1,5 +1,5 @@
 package net.fatty.channel {
     public interface IChannelPipelineFactory {
-        function get pipeline() : IChannelPipeline;
+        function get newPipeline() : IChannelPipeline;
     }
 }

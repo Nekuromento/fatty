@@ -27,6 +27,8 @@ package net.fatty.channel {
                     ++id;
                 }
             }
+
+            return 0;
         }
     
         private var _id : uint;
@@ -89,7 +91,7 @@ package net.fatty.channel {
             Channels.disconnect(this);
         }
     
-        public function write(message : *, remoteAddress : SocketAddress) : void {
+        public function write(message : *, remoteAddress : SocketAddress = null) : void {
             if (remoteAddress == null || remoteAddress == _remoteAddress)
                 Channels.write(this, message, null);
             else

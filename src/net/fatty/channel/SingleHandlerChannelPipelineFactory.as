@@ -6,7 +6,7 @@ package net.fatty.channel {
             _pipeline = pipeline;
         }
 
-        public function get pipeline() : IChannelPipeline {
+        public function get newPipeline() : IChannelPipeline {
             return Channels.copyPipeline(_pipeline);
         }
     }
