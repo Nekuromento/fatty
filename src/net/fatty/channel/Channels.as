@@ -35,7 +35,7 @@ package net.fatty.channel {
         }
 
         public static function pipelineFactory(pipeline : IChannelPipeline) : IChannelPipelineFactory {
-            return new SingleHandlerChannelPipelineFactory(pipeline);
+            return new CopyingChannelPipelineFactory(pipeline);
         }
     
         public static function fireChannelOpen(channel : IChannel) : void {
@@ -130,13 +130,22 @@ package net.fatty.channel {
                                                              amount));
         }
     
-        public static function connect(channel : IChannel, remoteAddress : SocketAddress) : void {
+        public static function connect(channel : IChannel,
+                                       remoteAddress : SocketAddress) : void {
             if (remoteAddress == null)
                 throw new ArgumentError("remoteAddress");
 
             channel.pipeline.sendDownstream(new DownstreamChannelStateEvent(channel,
                                                                             ChannelState.CONNECTED,
                                                                             remoteAddress));
+        }
+        
+        public static function writeForContext(ctx : IChannelHandlerContext,
+                                               message : *,
+                                               remoteAddress : SocketAddress) : void {
+            ctx.sendDownstream(new DownstreamMessageEvent(ctx.channel,
+                                                          message,
+                                                          remoteAddress));
         }
     
         public static function write(channel : IChannel,

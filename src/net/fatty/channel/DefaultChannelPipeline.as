@@ -5,6 +5,8 @@ package net.fatty.channel {
     import net.fatty.channel.events.IExceptionEvent;
     import net.fatty.channel.events.UpstreamMessageEvent;
 
+    import util.debug.warning;
+
     import com.adobe.utils.DictionaryUtil;
 
     import flash.errors.IllegalOperationError;
@@ -34,7 +36,7 @@ package net.fatty.channel {
         }
 
         private function get registryEmpty() : Boolean {
-            return _contextCount > 0;
+            return _contextCount == 0;
         }
 
         public function sendDownstream(event : IChannelEvent) : void {
@@ -57,6 +59,8 @@ package net.fatty.channel {
             const head : DefaultChannelHandlerContext =
                 getActualUpstreamContext(_head);
             if (head == null) {
+                //TODO : implement proper logging
+                warning("The pipeline contains no upstream handlers; discarding: " + event);
 //                if (logger.isWarnEnabled()) {
 //                    logger.warn(
 //                            "The pipeline contains no upstream handlers; discarding: " + e);
@@ -140,6 +144,8 @@ package net.fatty.channel {
                     removeContext(DefaultChannelHandlerContext(ctx));
                     removed = true;
                 } catch (t2 : Error) {
+                    //TODO: implement proper logging
+                    warning("Failed to remove a handler: " + ctx.name, t2);
 //                    if (logger.isWarnEnabled()) {
 //                        logger.warn("Failed to remove a handler: " + ctx.name, t2);
 //                    }
@@ -380,6 +386,9 @@ package net.fatty.channel {
                 }
     
                 if (!removed && !added) {
+                    //TODO: implement proper logging
+                    warning(removeException.message);
+                    warning(addException.message);
 //                    logger.warn(removeException.getMessage(), removeException);
 //                    logger.warn(addException.getMessage(), addException);
                     throw new ChannelHandlerLifeCycleException("Both " + String(ctx.handler) +
@@ -574,6 +583,9 @@ package net.fatty.channel {
         public function notifyHandlerException(event : IChannelEvent,
                                                e : Error) : void {
             if (event is IExceptionEvent) {
+                //TODO: implement proper logging
+                warning("An exception was thrown by a user handler " +
+                        "while handling an exception event (" + event + ")", e);
 //                if (logger.isWarnEnabled()) {
 //                    logger.warn(
 //                            "An exception was thrown by a user handler " +
@@ -591,6 +603,8 @@ package net.fatty.channel {
             try {
                 sink.exceptionCaught(this, event, pe);
             } catch (error : Error) {
+                //TODO: implement proper logging
+                warning("An exception was thrown by an exception handler.", error);
 //                if (logger.isWarnEnabled()) {
 //                    logger.warn("An exception was thrown by an exception handler.", error);
 //                }

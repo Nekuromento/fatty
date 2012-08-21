@@ -1,8 +1,8 @@
 package net.fatty.channel {
-    public class SingleHandlerChannelPipelineFactory implements IChannelPipelineFactory {
+    public class CopyingChannelPipelineFactory implements IChannelPipelineFactory {
         private var _pipeline : IChannelPipeline;
 
-        public function SingleHandlerChannelPipelineFactory(pipeline : IChannelPipeline) {
+        public function CopyingChannelPipelineFactory(pipeline : IChannelPipeline) {
             _pipeline = pipeline;
         }
 

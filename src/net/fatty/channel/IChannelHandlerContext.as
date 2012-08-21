@@ -5,6 +5,7 @@ package net.fatty.channel {
         function get channel() : IChannel;
         function get pipeline() : IChannelPipeline;
         function get handler() : IChannelHandler;
+        function get name() : String;
         function get canHandleUpstreamEvents() : Boolean;
         function get canHandleDownstreamEvents() : Boolean;
 

@@ -7,8 +7,7 @@ package net.fatty.channel {
 
     import util.debug.warning;
 
-    public class SimpleChannelHandler implements IChannelUpstreamHandler,
-                                                 IChannelDownstreamHandler {
+    public class SimpleChannelUpstreamHandler implements IChannelUpstreamHandler {
         public function handleUpstream(ctx : IChannelHandlerContext,
                                        event : IChannelEvent) : void {
             if (event is IMessageEvent) {
@@ -77,48 +76,6 @@ package net.fatty.channel {
         public function messageReceived(ctx : IChannelHandlerContext,
                                         event : IMessageEvent) : void {
             ctx.sendUpstream(event);
-        }
-
-        public function handleDownstream(ctx : IChannelHandlerContext,
-                                         event : IChannelEvent) : void {
-            if (event is IMessageEvent) {
-                writeRequested(ctx, IMessageEvent(event));
-            } else if (event is IChannelStateEvent) {
-                const evt : IChannelStateEvent = IChannelStateEvent(event);
-                if (evt.state == ChannelState.OPEN) {
-                    if (true !== evt.value)
-                        closeRequested(ctx, evt);
-                } else if (evt.state == ChannelState.CONNECTED) {
-                    if (evt.value != null)
-                        connectRequested(ctx, evt);
-                    else
-                        disconnectRequested(ctx, evt);
-                } else {
-                    ctx.sendDownstream(event);
-                }
-            } else {
-                ctx.sendDownstream(event);
-            }
-        }
-
-        public function disconnectRequested(ctx : IChannelHandlerContext,
-                                            event : IChannelStateEvent) : void {
-            ctx.sendDownstream(event);
-        }
-
-        public function connectRequested(ctx : IChannelHandlerContext,
-                                         event : IChannelStateEvent) : void {
-            ctx.sendDownstream(event);
-        }
-
-        public function closeRequested(ctx : IChannelHandlerContext,
-                                       event : IChannelStateEvent) : void {
-            ctx.sendDownstream(event);
-        }
-
-        public function writeRequested(ctx : IChannelHandlerContext,
-                                       event : IMessageEvent) : void {
-            ctx.sendDownstream(event);
         }
     }
 }
