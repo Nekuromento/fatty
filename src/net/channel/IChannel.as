@@ -3,12 +3,11 @@ package net.channel {
 
     public interface IChannel {
         function get pipeline() : IChannelPipeline;
-        function get isBound() : Boolean;
         function get isConnected() : Boolean;
         function get id() : uint;
         function get remoteAddress() : SocketAddress;
 
-        function write(message : *) : void;
+        function write(message : *, remoteAddress : SocketAddress = null) : void;
         function connect(address : SocketAddress) : void;
         function disconnect() : void;
         function close() : void;

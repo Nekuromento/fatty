@@ -9,6 +9,8 @@ package net.channel {
     public class AbstractChannel implements IChannel {
         private static const _allChannels : Dictionary = new Dictionary();
         private static const _random : Random = new Random();
+
+        private var _remoteAddress : SocketAddress;
     
         private static function allocateId(channel : IChannel) : uint {
             var id : uint = _random.nextUInt();
@@ -79,8 +81,11 @@ package net.channel {
             Channels.disconnect(this);
         }
     
-        public function write(message : *) : void {
-            Channels.write(this, message);
+        public function write(message : *, remoteAddress : SocketAddress) : void {
+            if (remoteAddress == null || remoteAddress == _remoteAddress)
+                Channels.write(this, message, null);
+            else
+                Channels.write(this, message, remoteAddress);
         }
     
         public function get attachment() : * {
@@ -91,22 +96,37 @@ package net.channel {
             _attachment = attachment;
         }
 
-        // abstract property
-        public function get isBound() : Boolean {
-            throw new UnimplementedException();
-            return false;
-        }
-
-        // abstract property
         public function get isConnected() : Boolean {
+            return isOpen && isSocketConnected;
+        }
+
+        // abstract property
+        public function get isSocketConnected() : Boolean {
             throw new UnimplementedException();
             return false;
         }
 
         // abstract property
-        public function get remoteAddress() : SocketAddress {
+        public function get isSocketClosed() : Boolean {
+            throw new UnimplementedException();
+            return false;
+        }
+
+        // abstract function
+        public function closeSocket() : void {
+            throw new UnimplementedException();
+        }
+
+        // abstract function
+        public function getRemoteSocketAddress() : SocketAddress {
             throw new UnimplementedException();
             return null;
+        }
+
+        public function get remoteAddress() : SocketAddress {
+            if (_remoteAddress == null)
+                _remoteAddress = getRemoteSocketAddress();
+            return _remoteAddress;
         }
     }
 }
