@@ -604,5 +604,19 @@ package net.fatty.channel {
 //                }
             }
         }
+
+        public function asArray() : Array {
+            const array : Array = new Array();
+            var ctx : DefaultChannelHandlerContext = _head;
+            for (;;) {
+                array.push(ctx.name);
+                array.push(ctx.handler);
+
+                ctx = ctx.next;
+                if (ctx == null)
+                    break;
+            }
+            return array;
+        }
     }
 }

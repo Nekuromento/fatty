@@ -58,7 +58,8 @@ package net.fatty.channel {
                               newName : String,
                               handler : IChannelHandler) : void;
         function addAfterType(type : Class,
-                              name : String,
-                              handler : IChannelHandler) : void;
+                              name : String, handler : IChannelHandler) : void;
+
+        function asArray() : Array;
     }
 }

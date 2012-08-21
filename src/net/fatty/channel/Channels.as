@@ -26,8 +26,12 @@ package net.fatty.channel {
         }
 
         public static function copyPipeline(pipeline : IChannelPipeline) : IChannelPipeline {
-            //TODO: implement
-            return null;
+            const elements : Array = pipeline.asArray();
+            const elementCount : uint = elements.length;
+            const copy : IChannelPipeline = newPipeline();
+            for (var i : uint = 0; i < elementCount; i += 2)
+                copy.addLast(elements[i], elements[i + 1]);
+            return copy;
         }
 
         public static function pipelineFactory(pipeline : IChannelPipeline) : IChannelPipelineFactory {
