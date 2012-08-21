@@ -1,12 +1,14 @@
 package net.fatty.channel {
-    import com.adobe.utils.DictionaryUtil;
-    import flash.errors.IllegalOperationError;
-    import flash.utils.Dictionary;
     import net.fatty.channel.errors.ChannelHandlerLifeCycleException;
     import net.fatty.channel.errors.ChannelPipelineException;
     import net.fatty.channel.events.IChannelEvent;
     import net.fatty.channel.events.IExceptionEvent;
     import net.fatty.channel.events.UpstreamMessageEvent;
+
+    import com.adobe.utils.DictionaryUtil;
+
+    import flash.errors.IllegalOperationError;
+    import flash.utils.Dictionary;
 
     public class DefaultChannelPipeline implements IChannelPipeline {
         private static const _discardingSink : IChannelSink = new DiscardingChannelSink();

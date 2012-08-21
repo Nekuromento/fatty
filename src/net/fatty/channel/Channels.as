@@ -1,6 +1,7 @@
 package net.fatty.channel {
     import net.SocketAddress;
     import net.fatty.channel.events.DefaultExceptionEvent;
+    import net.fatty.channel.events.DefaultWriteCompletionEvent;
     import net.fatty.channel.events.DownstreamChannelStateEvent;
     import net.fatty.channel.events.DownstreamMessageEvent;
     import net.fatty.channel.events.UpstreamChannelStateEvent;
@@ -109,6 +110,20 @@ package net.fatty.channel {
                                                              cause : Error) : void {
             ctx.sendUpstream(new DefaultExceptionEvent(ctx.channel,
                                                        cause));
+        }
+
+        public static function fireWriteComplete(channel : IChannel, amount : uint) : void {
+            if (amount == 0)
+                return;
+    
+            channel.pipeline.sendUpstream(new DefaultWriteCompletionEvent(channel,
+                                                                          amount));
+        }
+    
+        public static function fireWriteCompleteForContext(ctx : IChannelHandlerContext,
+                                                           amount : uint) : void {
+            ctx.sendUpstream(new DefaultWriteCompletionEvent(ctx.channel,
+                                                             amount));
         }
     
         public static function connect(channel : IChannel, remoteAddress : SocketAddress) : void {

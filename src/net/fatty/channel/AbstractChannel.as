@@ -11,6 +11,7 @@ package net.fatty.channel {
         private static const _random : Random = new Random();
 
         private var _remoteAddress : SocketAddress;
+        private var _worker : IWorker;
     
         private static function allocateId(channel : IChannel) : uint {
             var id : uint = _random.nextUInt();
@@ -44,6 +45,14 @@ package net.fatty.channel {
     
             pipeline.attach(this, sink);
         }
+
+        public final function get worker() : IWorker {
+            return _worker;
+        }
+
+        public final function set worker(value : IWorker) : void {
+            _worker = value;
+        }
     
         public final function get id() : uint {
             return _id;
@@ -61,12 +70,11 @@ package net.fatty.channel {
             return !_closed;
         }
     
-        protected function setClosed() : Boolean {
+        public function setClosed() : void {
             // Deallocate the current channel's ID from allChannels so that other
             // new channels can use it.
             delete _allChannels[id];
-    
-            return _closed = true;
+            _closed = true;
         }
     
         public function close() : void {

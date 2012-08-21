@@ -13,6 +13,10 @@ package net.fatty.channel {
             _socket = socket;
         }
 
+        public function get socket() : InetSocket {
+            return _socket;
+        }
+
         override public function get isSocketConnected() : Boolean {
             return _socket.connected;
         }
