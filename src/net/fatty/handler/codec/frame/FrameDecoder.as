@@ -24,7 +24,7 @@ package net.fatty.handler.codec.frame {
         private var _cumulation : ByteArray;
         private var _ctx : IChannelHandlerContext;
         private var _copyThreshold : uint;
-        private var _maxCumulationBufferComponents = DEFAULT_MAX_COMPOSITEBUFFER_COMPONENTS;
+        private var _maxCumulationBufferComponents : uint = DEFAULT_MAX_COMPOSITEBUFFER_COMPONENTS;
         
         public function FrameDecoder(unfold : Boolean = false) {
             _unfold = unfold;
