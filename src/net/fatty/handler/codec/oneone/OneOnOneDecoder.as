@@ -11,7 +11,7 @@ package net.fatty.handler.codec.oneone {
     public class OneOnOneDecoder implements IChannelUpstreamHandler {
         public function handleUpstream(ctx : IChannelHandlerContext,
                                        event : IChannelEvent) : void {
-            if (!(event instanceof IMessageEvent)) {
+            if (!(event is IMessageEvent)) {
                 ctx.sendUpstream(event);
                 return;
             }
