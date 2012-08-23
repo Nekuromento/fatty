@@ -59,6 +59,10 @@ package net.fatty.channel {
             try {
                 const a : ByteArray = ByteArray(message);
                 channel.socket.writeBytes(a, 0, a.bytesAvailable);
+
+                //TODO: flush only if option is set
+                channel.socket.flush();
+
                 Channels.fireWriteComplete(channel, length);
             } catch (t : Error) {
                 Channels.fireExceptionCaught(channel, t);

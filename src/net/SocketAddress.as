@@ -15,5 +15,9 @@ package net {
         public function get port() : int {
             return _port;
         }
+
+        public function toString() : String {
+            return host + ":" + port.toString();
+        }
     }
 }

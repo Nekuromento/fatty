@@ -23,6 +23,10 @@ package net.fatty.channel.events {
         public function get cause() : Error {
             return _cause;
         }
+
+        public function toString() : String {
+            return String(channel) + " EXCEPTION: " + String(cause);
+        }
     }
 }
 

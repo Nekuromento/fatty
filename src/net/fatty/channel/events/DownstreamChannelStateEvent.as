@@ -32,5 +32,23 @@ package net.fatty.channel.events {
         public function get value() : * {
             return _value;
         }
+        
+        public function toString() : String {
+            var buf : String = String(channel);
+            if (state == ChannelState.OPEN) {
+                if (true === value)
+                    buf += " OPEN";
+                else
+                    buf += " CLOSE";
+            } else if (state == ChannelState.CONNECTED) {
+                if (value != null)
+                    buf += " CONNECT: " + String(value);
+                else
+                    buf += " DISCONNECT";
+            } else {
+                buf += " " + state.name + ": " + String(value);
+            }
+            return buf;
+        }
     }
 }

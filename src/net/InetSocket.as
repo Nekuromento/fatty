@@ -7,7 +7,8 @@ package net {
 
         public function InetSocket(host : String = null, port : int = 0) {
             super(host, port);
-            _remoteAddress = new SocketAddress(host, port);
+            if (host != null)
+                _remoteAddress = new SocketAddress(host, port);
         }
 
         override public function connect(host : String, port : int) : void {

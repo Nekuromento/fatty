@@ -1,4 +1,5 @@
 package net.fatty.channel {
+    import com.adobe.utils.IntUtil;
     import net.SocketAddress;
 
     import util.Random;
@@ -137,6 +138,19 @@ package net.fatty.channel {
             if (_remoteAddress == null)
                 _remoteAddress = getRemoteSocketAddress();
             return _remoteAddress;
+        }
+
+        public function toString() : String {
+            const connected : Boolean = isConnected;
+    
+            var buf : String = "[id: 0x" + IntUtil.toHex(id);
+    
+            if (remoteAddress != null)
+                buf += (connected? " => " : " :> ") + String(remoteAddress);
+
+            buf += ']';
+    
+            return buf;
         }
     }
 }

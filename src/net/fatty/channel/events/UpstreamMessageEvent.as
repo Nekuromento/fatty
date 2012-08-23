@@ -32,5 +32,12 @@ package net.fatty.channel.events {
         public function get remoteAddress() : SocketAddress {
             return _remoteAddress;
         }
+
+        public function toString() : String {
+            if (remoteAddress == channel.remoteAddress)
+                return String(channel) + " RECEIVED: " + String(message);
+            else
+                return String(channel) + " RECEIVED: " + String(message) + " from " + String(remoteAddress);
+        }
     }
 }

@@ -21,5 +21,9 @@ package net.fatty.channel.events {
         public function get writtenAmount() : uint {
             return _writtenAmount;
         }
+
+        public function toString() : String {
+            return String(channel) + " WRITTEN_AMOUNT: " + writtenAmount.toString();
+        }
     }
 }
