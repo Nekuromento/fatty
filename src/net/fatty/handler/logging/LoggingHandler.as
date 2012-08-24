@@ -125,12 +125,12 @@ package net.fatty.handler.logging {
             for (i = 0; i < length; ++i) {
                 const mod16 : uint = i & 15;
                 if (mod16 == 0)
-                    dump += NEWLINE + "|" + IntUtil.toHex(i) + '|';
-                dump += BYTE2HEX[buf.readUnsignedByte()];
+                    dump += NEWLINE + "|" + IntUtil.toHex(i, true) + '|';
+                dump += BYTE2HEX[buf[position + i]];
                 if (mod16 == 15) {
                     dump += " |";
                     for (j = i - 15; j <= i; ++j)
-                        dump += BYTE2CHAR[buf.readUnsignedByte];
+                        dump += BYTE2CHAR[buf[position + j]];
                     dump += '|';
                 }
             }
@@ -145,8 +145,6 @@ package net.fatty.handler.logging {
     
             dump +=
                 NEWLINE + "+--------+-------------------------------------------------+----------------+";
-
-            buf.position = position;
 
             return dump;
         }

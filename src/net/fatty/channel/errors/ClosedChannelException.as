@@ -4,6 +4,7 @@ package net.fatty.channel.errors {
     public class ClosedChannelException extends Exception {
         public function ClosedChannelException(message : * = "", cause : Error = null, id : * = 0) {
             super(message, cause, id);
+            name = "ClosedChannelException";
         }
     }
 }
