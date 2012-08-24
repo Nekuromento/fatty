@@ -29,4 +29,3 @@ package net.fatty.channel.events {
         }
     }
 }
-

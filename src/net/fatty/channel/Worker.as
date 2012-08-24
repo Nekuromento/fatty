@@ -63,7 +63,7 @@ package net.fatty.channel {
                 //TODO: flush only if option is set
                 channel.socket.flush();
 
-                Channels.fireWriteComplete(channel, length);
+                Channels.fireWriteComplete(channel, a.length);
             } catch (t : Error) {
                 Channels.fireExceptionCaught(channel, t);
             }
