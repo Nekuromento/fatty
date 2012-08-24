@@ -29,6 +29,7 @@ package net.fatty.handler.logging {
         private var _hexDump : Boolean;
     
         private static function init() : void {
+            const hexChars : String = "0123456789abcdef";
             var i : uint;
             var j : uint;
             var padding : uint;
@@ -37,10 +38,8 @@ package net.fatty.handler.logging {
             // Generate the lookup table for byte-to-hex-dump conversion
             for (i = 0; i < 10; ++i)
                 BYTE2HEX[i] = " 0" + i;
-            for (; i < 16; ++i)
-                BYTE2HEX[i] = " 0" + i.toString(16);
             for (; i < BYTE2HEX.length; ++i)
-                BYTE2HEX[i] = " " + i.toString(16);
+                BYTE2HEX[i] = " " + hexChars.charAt((i >> 4) & 0xF) + hexChars.charAt(i & 0xF);
     
             // Generate the lookup table for hex dump paddings
             for (i = 0; i < HEXPADDING.length; ++i) {

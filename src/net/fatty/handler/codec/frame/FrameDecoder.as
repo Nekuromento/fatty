@@ -140,6 +140,7 @@ package net.fatty.handler.codec.frame {
                                   channel : IChannel,
                                   buffer : ByteArray) : * {
             throw new UnimplementedException();
+            return null;
         }
     
         protected function decodeLast(ctx : IChannelHandlerContext,
@@ -181,9 +182,6 @@ package net.fatty.handler.codec.frame {
                 if (result is Array) {
                     for each (var r : * in result)
                         Channels.fireMessageReceivedForContext(context, r, remoteAddress);
-                } else if (result is Vector.<*>) {
-                    for each (var rt : * in result)
-                        Channels.fireMessageReceivedForContext(context, rt, remoteAddress);
                 } else {
                     Channels.fireMessageReceivedForContext(context, result, remoteAddress);
                 }

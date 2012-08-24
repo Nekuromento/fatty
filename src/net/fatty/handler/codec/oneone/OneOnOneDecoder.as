@@ -32,6 +32,7 @@ package net.fatty.handler.codec.oneone {
                                   channel : IChannel,
                                   originalMessage : *) : * {
             throw new UnimplementedException();
+            return null;
         }
     }
 }
