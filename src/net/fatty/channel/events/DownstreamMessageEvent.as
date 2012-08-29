@@ -2,6 +2,8 @@ package net.fatty.channel.events {
     import net.SocketAddress;
     import net.fatty.channel.IChannel;
 
+    import flash.utils.ByteArray;
+
     public class DownstreamMessageEvent implements IMessageEvent {
         private var _channel : IChannel;
         private var _message : *;
@@ -36,9 +38,11 @@ package net.fatty.channel.events {
 
         public function toString() : String {
             if (remoteAddress == channel.remoteAddress)
-                return String(channel) + " WRITE: " + String(message);
+                return String(channel) + " WRITE: " +
+                    (message is ByteArray ? "ByteArray" : String(message));
             else
-                return String(channel) + " WRITE: " + String(message) + " to " + String(remoteAddress);
+                return String(channel) + " WRITE: " +
+                    (message is ByteArray ? "ByteArray" : String(message)) + " to " + String(remoteAddress);
         }
     }
 }
